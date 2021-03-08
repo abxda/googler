@@ -43,6 +43,10 @@ import unicodedata
 import urllib.parse
 import uuid
 import webbrowser
+from newspaper import Article
+#from datetime import datetime
+from newspaper import fulltext
+#import requests
 
 # Python optional dependency compatibility layer
 try:
@@ -2674,11 +2678,36 @@ class Result(object):
 
     def jsonizable_object(self):
         """Return a JSON-serializable dict representing the result entry."""
+        try:                    
+          a = Article(self.url, language='es')
+          a.download()
+          a.parse()
+          text = a.text.replace('\n',' ')
+          text = text.replace('\t',' ')
+          image = a.top_image
+          publish_date = a.publish_date.strftime("%d-%m-%Y")
+          #keywords = ';'.join(a.keywords)
+          authors = ';'.join(a.authors)
+
+
+        except:
+          text = ' '
+          image = ' '
+          authors = ' '
+          publish_date = ' '
+          #keywords = ' '
+
         obj = {
-            'title': self.title,
+            'title': self.title.encode().decode(),
             'url': self.url,
-            'abstract': self.abstract
-        }
+            'abstract': self.abstract.encode().decode(),
+            'text': text.encode().decode(),
+            'image': image,
+            'authors': authors.encode().decode(),
+            'publish_date': publish_date,
+            #'keywords':keywords,
+            #'collected': str(datetime.now())        
+            }
         if self.metadata:
             obj['metadata'] = self.metadata
         if self.sitelinks:
